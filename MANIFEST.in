@@ -1,0 +1,5 @@
+global-exclude *
+recursive-include libopenvas *.py
+recursive-include python_libopenvas.egg-info *
+include setup.* README.*
+exclude MANIFEST.in
