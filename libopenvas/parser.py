@@ -16,7 +16,7 @@ class OpenVASParser(object):
         except KeyError:
             root_node = root['get_reports_response']['report']
         report_node = root_node['report']
-        return Report(report_node, True)
+        return Report(report_node, False)
 
     @classmethod
     def parse(cls, data=None, ext='xml'):
@@ -45,4 +45,11 @@ class OpenVASParser(object):
 if __name__ == '__main__':
     obj = OpenVASParser.parse_fromfile('../test.xml')
     print( getattr(obj, 'loadtime', None) )
+    for h in obj.host_list:
+        try:
+            print( '{}: ({}ms, {}, {})'.format(h, h.cost, h.status, len(h.detail_list)) )
+            print( 'route: {}'.format(h.route) )
+            print( 'ports: {}'.format(h.ports) )
+        except Exception as e:
+            raise
 

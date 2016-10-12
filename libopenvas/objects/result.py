@@ -36,6 +36,24 @@ class Result(ObjectBase):
         (self._port,self._service,self._protocol) = parse_vas_port(port_s or self._port)
 
     @property
+    def trace_route(self):
+        if not hasattr(self, '_trace_route'):
+            self._trace_route = [x for x in self._description.split('\n') if x and not 'Here' in x] if self._host and getattr(self._nvt, 'name', None)=='Traceroute' and 'Here is the route from' in self._description else []
+        return self._trace_route
+
+    @property
+    def host_status(self):
+        if not hasattr(self, '_host_status'):
+            self._host_status = ('down' if 'was considered as dead' in self._description else 'up') if self._host and getattr(self._nvt, 'name', None)=='Ping Host' else ''
+        return self._host_status
+
+    @property
+    def open_port(self):
+        if not hasattr(self, '_open_port'):
+            self._open_port = ','.join([l.replace('TCP ports','T').replace('UDP ports','U') for l in self._description.split('\n') if 'P ports:' in l]) if self._host and getattr(self._nvt, 'name', None)=='Host Summary' and 'ports:' in self._description else ''
+        return self._open_port
+
+    @property
     def service(self):
         return self._service
 

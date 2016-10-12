@@ -12,6 +12,17 @@ class Report(ObjectBase):
 
     def __init__(self, param={}, debug=False):
         super(Report, self).__init__(param, debug)
+        host_status = {}
+        try:
+            self._results = []
+            for result in [param['results']['result'],] if isinstance(param['results']['result'], dict) else param['results']['result']:
+                item = Result(result, debug)
+                self._results.append( item )
+                if item.name=='Ping Host'    and item.host_status: host_status.setdefault(item.host, dict(status='up',route=[],ports=''))['status'] = item.host_status
+                if item.name=='Traceroute'   and item.trace_route: host_status.setdefault(item.host, dict(status='up',route=[],ports=''))['route']  = item.trace_route
+                if item.name=='Host Summary' and item.open_port  : host_status.setdefault(item.host, dict(status='up',route=[],ports=''))['ports']  = item.open_port
+        except KeyError:
+            pass
         for action in ('start', 'end'):
             try:
                 keyword = 'host_%s'%action
@@ -26,16 +37,15 @@ class Report(ObjectBase):
                 pass
         try:
             self.host_list = []
+            self.host_dict = {}
             for host in [param['host'],] if isinstance(param['host'], dict) and param['host'].has_key('ip') else param['host']:
-                host.update( dict(host_start=self.host_start_dict.get(host.get('ip')), host_end=self.host_end_dict.get(host.get('ip'))) )
+                ip = host.get('ip')
+                if not ip: continue
+                host_status.setdefault(ip, {}).update( dict(host_start=self.host_start_dict.get(ip), host_end=self.host_end_dict.get(ip)) )
+                host.update( host_status[ip] )
                 self.host_list.append( Host(host, debug) )
         except KeyError:
             pass
-        try:
-            result_list = [param['results']['result'],] if isinstance(param['results']['result'], dict) else param['results']['result']
-            self._results = [Result(result, debug) for result in result_list]
-        except KeyError:
-            self.result_list = []
         try:
             self._task = Task(param['task'], debug)
         except KeyError:

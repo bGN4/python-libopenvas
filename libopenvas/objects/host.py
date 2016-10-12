@@ -58,7 +58,7 @@ class HostTime(ObjectBase):
 
 class Host(ObjectBase):
     _member1 = ()
-    _member2 = ('ip', 'start', 'end', 'host_start', 'host_end')
+    _member2 = ('ip', 'start', 'end', 'host_start', 'host_end', 'status', 'route', 'ports')
 
     def __init__(self, param={}, debug=False):
         super(Host, self).__init__(param, debug)
@@ -66,7 +66,7 @@ class Host(ObjectBase):
             detail_list = [param['detail'],] if isinstance(param['detail'], dict) and param['detail'].has_key('name') else param['detail']
             self.detail_list = [HostDetail(detail, debug) for detail in detail_list]
         except KeyError:
-            self._detail_list = []
+            self.detail_list = []
         if debug: self.check_keyword(param, ('detail',))
         self._calc_cost()
 
